@@ -16,7 +16,7 @@ module.exports = {
 		keepAlive: true,
 	}),
 
-	model: OrderModel,
+	model: WalletModel,
 
 	/**
 	 * Settings
