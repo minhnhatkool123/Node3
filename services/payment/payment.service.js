@@ -18,9 +18,9 @@ module.exports = {
 	crons: [
 		{
 			name: "CHECK_ORDER",
-			cronTime: "0/1 * * * *", // every minutes
+			cronTime: "0/5 * * * *", // every 5 minutes
 			onTick: async function () {
-				console.log("XOA ORDER");
+				await this.call('v1.payment.updateOrderStatus')
 			},
 			runOnInit: () => {
 				console.log("CHECK_ORDER job is created");
@@ -33,6 +33,20 @@ module.exports = {
 	 * Actions
 	 */
 	actions: {
+		urlReturn: {
+			rest: {
+				method: "POST",
+				fullPath: "/v1/External/UrlReturn/:orderId",
+				auth: false
+			},
+			params: {
+				body: {
+					$$type: "object",
+					status: "string",
+				},
+			},
+			handler: require("./actions/urlReturn"),
+		},
 		createOrder: {
 			rest: {
 				method: "POST",
@@ -45,7 +59,6 @@ module.exports = {
 			params: {
 				body: {
 					$$type: "object",
-					userId: "number",
 					paymentMethod: "string",
 					note: "string|optional",
 					total: "number|positive",
@@ -53,23 +66,17 @@ module.exports = {
 			},
 			handler: require("./actions/createOrder.action"),
 		},
-		searchOrder: {
+		getOrder: {
 			rest: {
-				method: "POST",
-				fullPath: "/v1/External/SearchOrder",
-				auth: {
-					strategies: ["Default"],
-					mode: "required", // 'required', 'optional', 'try'
-				},
+				method: "GET",
+				fullPath: "/v1/External/GetOrder/:orderId",
+				auth: false
 			},
-			params: {
-				body: {
-					$$type: "object",
-					orderId: "number",
-				},
-			},
-			handler: require("./actions/searchOrder.action"),
+			handler: require("./actions/getOrder.action"),
 		},
+		updateOrderStatus: {
+			handler: require("./actions/updateOrderStatus.action"),
+		}
 	},
 
 	/**
@@ -85,15 +92,15 @@ module.exports = {
 	/**
 	 * Service created lifecycle event handler
 	 */
-	created() {},
+	created() { },
 
 	/**
 	 * Service started lifecycle event handler
 	 */
-	async started() {},
+	async started() { },
 
 	/**
 	 * Service stopped lifecycle event handler
 	 */
-	async stopped() {},
+	async stopped() { },
 };

@@ -34,6 +34,7 @@
     "moleculer-repl": "^0.7.0"
   },
   "dependencies": {
+    "async-await-foreach": "^1.0.4",
     "axios": "^0.21.1",
     "bcrypt": "^5.0.1",
     "crypto-js": "^4.1.1",

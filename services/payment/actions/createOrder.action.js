@@ -13,21 +13,21 @@ module.exports = async function (ctx) {
 		const userId = ctx.meta.auth.credentials.userId;
 		const payload = ctx.params.body;
 		const obj = {
-			userId: payload.userId,
 			paymentMethod: payload.paymentMethod,
 			total: payload.total,
 		};
 
-		if (userId !== obj.userId) {
-			return {
-				code: 1001,
-				message: "Không tồn tại userId",
-			};
-		}
-
 		if (!_.isNil(_.get(payload, "note", null))) {
 			obj.note = payload.note;
 		}
+
+		if (obj.total < 5000) {
+			return {
+				code: 1001,
+				message: "Giá đơn hàng phải lớn hơn hoặc bằng 5000",
+			};
+		}
+
 
 		let orderInfo = null;
 		if (obj.paymentMethod === "Wallet") {
@@ -51,7 +51,10 @@ module.exports = async function (ctx) {
 				};
 			}
 
-			orderInfo = await this.broker.call("v1.order.create", [obj]);
+			obj.status = "Success";
+			orderInfo = await this.broker.call("v1.order.create", [{
+				...obj, userId
+			}]);
 			console.log(orderInfo);
 			if (_.get(orderInfo, "id", null) === null) {
 				return {
@@ -68,7 +71,6 @@ module.exports = async function (ctx) {
 					$inc: {
 						total: -obj.total,
 					},
-					status: "Success",
 				},
 			]);
 			if (_.get(walletInfo, "id", null) === null) {
@@ -84,7 +86,10 @@ module.exports = async function (ctx) {
 		} else if (obj.paymentMethod === "Atm") {
 			console.log("vào ATM thanh toán");
 			obj.status = "Pending";
-			orderInfo = await this.broker.call("v1.order.create", [obj]);
+			orderInfo = await this.broker.call("v1.order.create", [{
+				...obj,
+				userId
+			}]);
 			if (_.get(orderInfo, "id", null) === null) {
 				return {
 					code: 1001,
@@ -103,12 +108,6 @@ module.exports = async function (ctx) {
 			};
 		}
 
-		// if (_.get(miniProgramCreate, "id", null) === null) {
-		// 	return {
-		// 		code: 1001,
-		// 		message: "Thất bại",
-		// 	};
-		// }
 	} catch (err) {
 		if (err.name === "MoleculerError") throw err;
 		throw new MoleculerError(`[MiniProgram] Add: ${err.message}`);
