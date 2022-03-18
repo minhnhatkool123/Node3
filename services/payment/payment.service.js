@@ -42,7 +42,8 @@ module.exports = {
 			params: {
 				body: {
 					$$type: "object",
-					status: "string",
+					"data-checksum": "string",
+					key: "string"
 				},
 			},
 			handler: require("./actions/urlReturn"),

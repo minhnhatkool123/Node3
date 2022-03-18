@@ -79,6 +79,19 @@ module.exports = async function (ctx) {
 					message: "Thanh toán bằng ví thất bại",
 				};
 			}
+
+			const walletHistoryInfo = await this.broker.call("v1.walletHistory.create", [{
+				walletId: walletInfo.id,
+				payment: obj.total
+			}])
+
+			if (_.get(walletHistoryInfo, "id", null) === null) {
+				return {
+					code: 1001,
+					message: "Thanh toán bằng ví thất bại",
+				};
+			}
+
 			return {
 				code: 1000,
 				message: "Thanh toán bằng ví thành công",
