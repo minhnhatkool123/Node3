@@ -15,7 +15,7 @@ const Schema = mongoose.Schema(
 			type: Number,
 			require: true,
 		},
-		total: {
+		amount: {
 			type: Number,
 			required: true,
 		},

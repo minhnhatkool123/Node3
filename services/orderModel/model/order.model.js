@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const autoIncrement = require("mongoose-auto-increment");
 const Moment = require("moment");
+const orderConstant = require("../constants/orderConstant");
 
 autoIncrement.initialize(mongoose);
 
@@ -11,44 +12,47 @@ const Schema = mongoose.Schema(
 			required: true,
 			unique: true,
 		},
+		orderId: {
+			type: String,
+			required: true,
+			unique: true,
+		},
 		userId: {
 			type: Number,
+			require: true,
+		},
+		transaction: {
+			type: String,
+			require: true,
+			unique: true,
+		},
+		partnerTransaction: {
+			type: String,
 			require: true,
 		},
 		paymentMethod: {
 			type: String,
 			require: true,
-			enum: ["Wallet", "Atm"],
+			enum: [
+				orderConstant.PAYMENT_METHOD.WALLET,
+				orderConstant.PAYMENT_METHOD.ATM,
+			],
 		},
 		note: {
 			type: String,
 			default: "",
 		},
-		// receiverInfo: {
-		// 	name: {
-		// 		type: String,
-		// 		required: true,
-		// 	},
-		// 	email: {
-		// 		type: String,
-		// 		required: true,
-		// 	},
-		// 	phone: {
-		// 		type: String,
-		// 		required: true,
-		// 	},
-		// 	address: {
-		// 		type: String,
-		// 		required: true,
-		// 	},
-		// },
 		total: {
 			type: Number,
 			required: true,
 		},
 		status: {
 			type: String,
-			enum: ["Canceled", "Pending", "Success"],
+			enum: [
+				orderConstant.STATUS.CANCELED,
+				orderConstant.STATUS.PENDING,
+				orderConstant.STATUS.SUCCESS,
+			],
 		},
 	},
 	{

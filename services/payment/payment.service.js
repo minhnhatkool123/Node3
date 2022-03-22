@@ -20,7 +20,7 @@ module.exports = {
 			name: "CHECK_ORDER",
 			cronTime: "0/5 * * * *", // every 5 minutes
 			onTick: async function () {
-				await this.call('v1.payment.updateOrderStatus')
+				await this.call("v1.payment.updateOrderStatus");
 			},
 			runOnInit: () => {
 				console.log("CHECK_ORDER job is created");
@@ -37,13 +37,12 @@ module.exports = {
 			rest: {
 				method: "POST",
 				fullPath: "/v1/External/UrlReturn/:orderId",
-				auth: false
+				auth: false,
 			},
 			params: {
 				body: {
 					$$type: "object",
-					"data-checksum": "string",
-					key: "string"
+					apiMessage: "string",
 				},
 			},
 			handler: require("./actions/urlReturn"),
@@ -71,13 +70,16 @@ module.exports = {
 			rest: {
 				method: "GET",
 				fullPath: "/v1/External/GetOrder/:orderId",
-				auth: false
+				auth: {
+					strategies: ["Default"],
+					mode: "required", // 'required', 'optional', 'try'
+				},
 			},
 			handler: require("./actions/getOrder.action"),
 		},
 		updateOrderStatus: {
 			handler: require("./actions/updateOrderStatus.action"),
-		}
+		},
 	},
 
 	/**
@@ -93,15 +95,15 @@ module.exports = {
 	/**
 	 * Service created lifecycle event handler
 	 */
-	created() { },
+	created() {},
 
 	/**
 	 * Service started lifecycle event handler
 	 */
-	async started() { },
+	async started() {},
 
 	/**
 	 * Service stopped lifecycle event handler
 	 */
-	async stopped() { },
+	async stopped() {},
 };

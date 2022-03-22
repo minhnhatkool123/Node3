@@ -1,5 +1,9 @@
 const _ = require("lodash");
 const { MoleculerError } = require("moleculer").Errors;
+const { v1: uuidv1 } = require("uuid");
+const ShortUniqueId = require("short-unique-id");
+const uid = new ShortUniqueId();
+const paymentConstant = require("../constants/paymentConstant");
 
 module.exports = async function (ctx) {
 	try {
@@ -28,81 +32,73 @@ module.exports = async function (ctx) {
 			};
 		}
 
-
 		let orderInfo = null;
-		if (obj.paymentMethod === "Wallet") {
-			let walletInfo = await this.broker.call("v1.wallet.findOne", [
+		let uuid = uid(15);
+		if (obj.paymentMethod === paymentConstant.PAYMENT_METHOD.WALLET) {
+			obj.status = paymentConstant.STATUS.PENDING;
+			orderInfo = await this.broker.call("v1.order.create", [
 				{
+					...obj,
 					userId,
+					orderId: uid(15),
+					transaction: uuid,
+					partnerTransaction: "",
 				},
 			]);
 
-			if (_.get(walletInfo, "id", null) === null) {
-				return {
-					code: 1001,
-					message: "Kiểm tra ví thất bại",
-				};
-			}
+			let payWallet = await this.broker.call("v1.payWallet.pay", {
+				transaction: uuid,
+				userId,
+			});
 
-			if (walletInfo.total < obj.total) {
-				return {
-					code: 1001,
-					message: "Bạn không đủ tiền trong ví",
-				};
-			}
+			if (payWallet.code === 1000) {
+				orderInfo = await this.broker.call(
+					"v1.order.findOneAndUpdate",
+					[
+						{
+							transaction: uuid,
+						},
+						{
+							status: paymentConstant.STATUS.SUCCESS,
+						},
+						{ new: true, select: { _id: 0 } },
+					]
+				);
 
-			obj.status = "Success";
-			orderInfo = await this.broker.call("v1.order.create", [{
-				...obj, userId
-			}]);
-			console.log(orderInfo);
-			if (_.get(orderInfo, "id", null) === null) {
 				return {
-					code: 1001,
-					message: "Tạo đơn hàng thất bại",
+					code: 1000,
+					message: "Thanh toán bằng ví thành công",
+					order: orderInfo,
 				};
-			}
+			} else {
+				orderInfo = await this.broker.call(
+					"v1.order.findOneAndUpdate",
+					[
+						{
+							transaction: uuid,
+						},
+						{
+							status: paymentConstant.STATUS.CANCELED,
+						},
+					]
+				);
 
-			walletInfo = await this.broker.call("v1.wallet.findOneAndUpdate", [
-				{
-					userId,
-				},
-				{
-					$inc: {
-						total: -obj.total,
-					},
-				},
-			]);
-			if (_.get(walletInfo, "id", null) === null) {
 				return {
 					code: 1001,
 					message: "Thanh toán bằng ví thất bại",
 				};
 			}
-
-			const walletHistoryInfo = await this.broker.call("v1.walletHistory.create", [{
-				walletId: walletInfo.id,
-				payment: obj.total
-			}])
-
-			if (_.get(walletHistoryInfo, "id", null) === null) {
-				return {
-					code: 1001,
-					message: "Thanh toán bằng ví thất bại",
-				};
-			}
-
-			return {
-				code: 1000,
-				message: "Thanh toán bằng ví thành công",
-			};
-		} else if (obj.paymentMethod === "Atm") {
+		} else if (obj.paymentMethod === paymentConstant.PAYMENT_METHOD.ATM) {
 			console.log("vào ATM thanh toán");
-			obj.status = "Pending";
-			orderInfo = await this.broker.call("v1.order.create", [{
-				...obj,
-				userId
-			}]);
+			obj.status = paymentConstant.STATUS.PENDING;
+			orderInfo = await this.broker.call("v1.order.create", [
+				{
+					...obj,
+					userId,
+					orderId: uid(15),
+					transaction: uuid,
+				},
+			]);
 			if (_.get(orderInfo, "id", null) === null) {
 				return {
 					code: 1001,
@@ -120,7 +116,6 @@ module.exports = async function (ctx) {
 				message: "Tạo đơn hàng thất bại",
 			};
 		}
-
 	} catch (err) {
 		if (err.name === "MoleculerError") throw err;
 		throw new MoleculerError(`[MiniProgram] Add: ${err.message}`);
