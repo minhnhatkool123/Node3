@@ -41,7 +41,7 @@ module.exports = async function (ctx) {
 		}
 
 		dataDecrypt = this.convertData(dataDecrypt);
-		console.log("dataDecrypt", dataDecrypt);
+		//console.log("dataDecrypt", dataDecrypt);
 
 		let order = await this.broker.call("v1.order.findOne", [
 			{
