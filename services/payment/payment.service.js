@@ -1,5 +1,8 @@
 const _ = require("lodash");
 const Cron = require("moleculer-cron");
+const { I18n } = require("i18n");
+const path = require("path");
+const DIRNAME = __dirname;
 
 module.exports = {
 	name: "payment",
@@ -10,6 +13,18 @@ module.exports = {
 	 * Settings
 	 */
 	settings: {},
+
+	hooks: {
+		before: {
+			"*": [
+				function setLanguage(ctx) {
+					const language =
+						_.get(ctx.params, "body.language", "") || "vi";
+					this.setLocale(language);
+				},
+			],
+		},
+	},
 
 	/**
 	 * Dependencies
@@ -36,7 +51,7 @@ module.exports = {
 		urlReturn: {
 			rest: {
 				method: "POST",
-				fullPath: "/v1/External/UrlReturn/:orderId",
+				fullPath: "/v1/External/UrlReturn",
 				auth: false,
 			},
 			params: {
@@ -90,12 +105,21 @@ module.exports = {
 	/**
 	 * Methods
 	 */
-	methods: {},
+	methods: {
+		convertData: require("./methods/convertData.method"),
+	},
 
 	/**
 	 * Service created lifecycle event handler
 	 */
-	created() {},
+	created() {
+		this.$i18n = new I18n({
+			locales: ["vi", "en"],
+			directory: path.join(DIRNAME, "/locales"),
+			defaultLocale: "vi",
+			register: this,
+		});
+	},
 
 	/**
 	 * Service started lifecycle event handler

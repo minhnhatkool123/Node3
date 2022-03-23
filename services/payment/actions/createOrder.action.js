@@ -10,7 +10,7 @@ module.exports = async function (ctx) {
 		if (_.get(ctx, "meta.auth.credentials.userId", null) === null) {
 			return {
 				code: 1001,
-				message: "Không tồn tại userId",
+				message: this.__("Mã khách hàng không tồn tại"),
 			};
 		}
 
@@ -28,7 +28,7 @@ module.exports = async function (ctx) {
 		if (obj.total < 5000) {
 			return {
 				code: 1001,
-				message: "Giá đơn hàng phải lớn hơn hoặc bằng 5000",
+				message: this.__("Giá đơn hàng phải lớn hơn hoặc bằng 5000"),
 			};
 		}
 
@@ -67,7 +67,7 @@ module.exports = async function (ctx) {
 
 				return {
 					code: 1000,
-					message: "Thanh toán bằng ví thành công",
+					message: this.__("Thanh toán thành công"),
 					order: orderInfo,
 				};
 			} else {
@@ -85,7 +85,7 @@ module.exports = async function (ctx) {
 
 				return {
 					code: 1001,
-					message: "Thanh toán bằng ví thất bại",
+					message: this.__("Thanh toán thất bại"),
 				};
 			}
 		} else if (obj.paymentMethod === paymentConstant.PAYMENT_METHOD.ATM) {
@@ -97,12 +97,13 @@ module.exports = async function (ctx) {
 					userId,
 					orderId: uid(15),
 					transaction: uuid,
+					partnerTransaction: "mn4UupDOhfxbElj", // giả sử bên t3 trả về
 				},
 			]);
 			if (_.get(orderInfo, "id", null) === null) {
 				return {
 					code: 1001,
-					message: "Tạo đơn hàng thất bại",
+					message: this.__("Tạo đơn hàng thất bại"),
 				};
 			}
 
@@ -113,7 +114,7 @@ module.exports = async function (ctx) {
 		} else {
 			return {
 				code: 1001,
-				message: "Tạo đơn hàng thất bại",
+				message: this.__("Tạo đơn hàng thất bại"),
 			};
 		}
 	} catch (err) {

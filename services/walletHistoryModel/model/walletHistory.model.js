@@ -16,7 +16,7 @@ const Schema = mongoose.Schema(
 			require: true,
 			unique: true,
 		},
-		userId: {
+		walletId: {
 			type: Number,
 			require: true,
 		},

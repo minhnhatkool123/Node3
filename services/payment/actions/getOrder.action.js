@@ -6,7 +6,7 @@ module.exports = async function (ctx) {
 		if (_.get(ctx, "meta.auth.credentials.userId", null) === null) {
 			return {
 				code: 1001,
-				message: "Không tồn tại userId",
+				message: this.__("Mã khách hàng không tồn tại"),
 			};
 		}
 
@@ -24,14 +24,14 @@ module.exports = async function (ctx) {
 		if (_.get(order, "id", null) === null) {
 			return {
 				code: 1001,
-				message: "Lấy đơn hàng thất bại",
+				message: this.__("Đơn hàng không tồn tại"),
 			};
 		}
 
 		if (userId !== order.userId) {
 			return {
 				code: 1001,
-				message: "Lấy đơn hàng thất bại",
+				message: this.__("Đơn hàng không tồn tại"),
 			};
 		}
 
@@ -47,7 +47,7 @@ module.exports = async function (ctx) {
 		if (_.get(userInfo, "id", null) === null) {
 			return {
 				code: 1001,
-				message: "Lấy đơn hàng thất bại",
+				message: this.__("Mã khách hàng không tồn tại"),
 			};
 		}
 
@@ -60,7 +60,7 @@ module.exports = async function (ctx) {
 
 		return {
 			code: 1000,
-			message: "Lấy đơn hàng thành công",
+			message: this.__("Lấy đơn hàng thành công"),
 			order,
 		};
 	} catch (err) {

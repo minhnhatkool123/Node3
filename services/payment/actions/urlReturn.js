@@ -1,5 +1,6 @@
 const _ = require("lodash");
 const { MoleculerError } = require("moleculer").Errors;
+const paymentConstant = require("../constants/paymentConstant");
 const Moment = require("moment");
 const CryptoJS = require("crypto-js");
 const NodeRSA = require("node-rsa");
@@ -7,83 +8,98 @@ const fs = require("fs");
 
 module.exports = async function (ctx) {
 	try {
-		//apiMessage U2FsdGVkX1+0QKQszFVUoOlR3HkWV545SPTuFFZuxIpI713ghLhKPGsROBQeOROfUiGaE5gxzKCGC2UXvYYCfFj7rIDLmSSVvdopCIVj8qJTbseGf7E087rjvZraYEIH
+		//apiMessage U2FsdGVkX1+BmKJPcTl6XY7P7KSSD5MeZB1PXm9XUbVpuZZJiD5i6NLMUI39lr4q58Ko0xcFYo8GSnh03UOBljqDOfyBYN9LVYc2TkHAsuM=
 		// {
-		//     transaction: uid(10),  // transaction bên t3
+		//     transaction: "mn4UupDOhfxbElj",  // transaction bên t3 giả sử
 		//     status: 'Success',
-		//     orderId: '6PU3xovZnKxOLMS',
+		//
 		//
 		//  };
 
-		// apiMessage U2FsdGVkX1+w6fjaeqZ5ecvdr72Mz9UIvbMQzjJ4sSv4oe+ROLcBRU0z0pGWL8i5wLUju7VjHDVMq3CkTftBafQsaFK9qhSzJfIj1mZ2Gg/rektmWcgZQ75gXMvD4Cq7
+		// apiMessage U2FsdGVkX1/sHxyN/WnIIgVbP+b/w6TQwqD27g0MvZ9nt4mfj8SDo2qt1DBh7tnKxu1WsliI9lyU9KDwTHHfwIQZICCeWyTu2zKirdOVcKA=
 		// {
-		//     transaction: uid(10),    // transaction bên t3
+		//     transaction:"mn4UupDOhfxbElj",    // transaction bên t3 giả sử
 		//     status: 'Failed',
-		//     orderId: '6PU3xovZnKxOLMS',
+		//
 		//   };
 
 		//const { orderId } = ctx.params.params;
 		const { apiMessage } = ctx.params.body;
 
-		let checksumDecrypt = JSON.parse(
+		let dataDecrypt = JSON.parse(
 			CryptoJS.AES.decrypt(
 				apiMessage,
 				process.env.SECRET_KEY_CHECK
 			).toString(CryptoJS.enc.Utf8)
 		);
-		console.log("checksumDecrypt", checksumDecrypt);
 
-		if (!checksumDecrypt) {
+		if (!dataDecrypt) {
 			return {
 				code: 1001,
-				message: "Cập nhập đơn hàng thất bại",
+				message: this.__("Thông tin mã hóa sai"),
 			};
 		}
 
-		//checksumDecrypt = JSON.parse(checksumDecrypt);
+		dataDecrypt = this.convertData(dataDecrypt);
+		console.log("dataDecrypt", dataDecrypt);
 
-		// let order = await this.broker.call("v1.order.findOne", [
-		// 	{
-		// 		id: orderId,
-		// 		status: "Pending",
-		// 	},
-		// ]);
+		let order = await this.broker.call("v1.order.findOne", [
+			{
+				partnerTransaction: dataDecrypt.partnerTransaction,
+			},
+		]);
 
-		// if (_.get(order, "id", null) === null) {
-		// 	return {
-		// 		code: 1001,
-		// 		message: "Không có đơn hàng này",
-		// 	};
-		// }
+		if (_.get(order, "id", null) === null) {
+			return {
+				code: 1001,
+				message: this.__("Đơn hàng không tồn tại"),
+			};
+		}
 
-		// if (Moment(order.createdAt).add(2, "h").isBefore(new Date())) {
-		// 	return {
-		// 		code: 1001,
-		// 		message: "Đơn hàng đã bị hủy",
-		// 	};
-		// }
+		if (order.status !== paymentConstant.STATUS.PENDING) {
+			return {
+				code: 1001,
+				message: this.__("Đơn hàng không tồn tại"),
+			};
+		}
 
-		// order = await this.broker.call("v1.order.findOneAndUpdate", [
-		// 	{
-		// 		id: orderId,
-		// 		status: "Pending",
-		// 	},
-		// 	{
-		// 		status: checksumDecrypt.status,
-		// 	},
-		// ]);
+		if (Moment(order.createdAt).add(2, "h").isBefore(new Date())) {
+			return {
+				code: 1001,
+				message: this.__("Đơn hàng đã bị hủy"),
+			};
+		}
 
-		// if (_.get(order, "id", null) === null) {
-		// 	return {
-		// 		code: 1001,
-		// 		message: "Cập nhập đơn hàng thất bại",
-		// 	};
-		// }
+		order = await this.broker.call("v1.order.findOneAndUpdate", [
+			{
+				partnerTransaction: dataDecrypt.partnerTransaction,
+			},
+			{
+				status: dataDecrypt.status,
+			},
+			{ new: true, select: { _id: 0 } },
+		]);
 
-		return {
-			code: 1000,
-			message: "Thanh toán thành công",
-		};
+		if (_.get(order, "id", null) === null) {
+			return {
+				code: 1001,
+				message: this.__("Cập nhập đơn hàng thất bại"),
+			};
+		}
+
+		if (order.status === paymentConstant.STATUS.SUCCESS) {
+			return {
+				code: 1000,
+				message: this.__("Thanh toán thành công"),
+				order,
+			};
+		} else {
+			return {
+				code: 1001,
+				message: this.__("Thanh toán thất bại"),
+				order,
+			};
+		}
 	} catch (err) {
 		if (err.name === "MoleculerError") throw err;
 		throw new MoleculerError(`[MiniProgram] Add: ${err.message}`);

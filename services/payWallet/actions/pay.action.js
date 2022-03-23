@@ -18,7 +18,7 @@ module.exports = async function (ctx) {
 				if (_.get(wallet, "id", null) === null) {
 					return {
 						code: 1001,
-						message: "Không tồn tại ví",
+						message: this.__("Ví không tồn tại"),
 					};
 				}
 
@@ -31,14 +31,14 @@ module.exports = async function (ctx) {
 				if (_.get(order, "id", null) === null) {
 					return {
 						code: 1001,
-						message: "Không tồn tại hóa đơn",
+						message: this.__("Đơn hàng không tồn tại"),
 					};
 				}
 
 				if (wallet.amount < order.total) {
 					return {
 						code: 1001,
-						message: "Không đủ tiền trong ví",
+						message: this.__("Ví không đủ tiền"),
 					};
 				}
 
@@ -47,7 +47,7 @@ module.exports = async function (ctx) {
 					[
 						{
 							transaction,
-							userId,
+							walletId: wallet.id,
 							before: wallet.amount,
 							amount: order.total,
 							after: wallet.amount - order.total,
@@ -59,7 +59,7 @@ module.exports = async function (ctx) {
 				if (_.get(walletHistory, "id", null) === null) {
 					return {
 						code: 1001,
-						message: "Thanh toán bằng ví thất bại",
+						message: this.__("Thanh toán thất bại"),
 					};
 				}
 
@@ -89,7 +89,7 @@ module.exports = async function (ctx) {
 
 					return {
 						code: 1001,
-						message: "Thanh toán bằng ví thất bại",
+						message: this.__("Thanh toán thất bại"),
 					};
 				}
 
@@ -107,7 +107,7 @@ module.exports = async function (ctx) {
 
 				return {
 					code: 1000,
-					message: "Thanh toán bằng ví thành công",
+					message: this.__("Thanh toán thành công"),
 				};
 			})
 			.catch(function (err) {
