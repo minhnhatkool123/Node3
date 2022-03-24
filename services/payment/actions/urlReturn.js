@@ -45,7 +45,7 @@ module.exports = async function (ctx) {
 
 		let order = await this.broker.call("v1.order.findOne", [
 			{
-				partnerTransaction: dataDecrypt.partnerTransaction,
+				supplierTransaction: dataDecrypt.supplierTransaction,
 			},
 		]);
 
@@ -72,7 +72,7 @@ module.exports = async function (ctx) {
 
 		order = await this.broker.call("v1.order.findOneAndUpdate", [
 			{
-				partnerTransaction: dataDecrypt.partnerTransaction,
+				supplierTransaction: dataDecrypt.supplierTransaction,
 			},
 			{
 				status: dataDecrypt.status,

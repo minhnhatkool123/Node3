@@ -16,9 +16,16 @@ module.exports = async function (ctx) {
 				]);
 
 				if (_.get(wallet, "id", null) === null) {
+					wallet = await this.broker.call("v1.wallet.create", [
+						{
+							userId,
+							amount: 0,
+						},
+					]);
+
 					return {
 						code: 1001,
-						message: this.__("Ví không tồn tại"),
+						message: this.__("Số dư ko đủ"),
 					};
 				}
 

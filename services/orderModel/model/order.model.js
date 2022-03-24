@@ -26,9 +26,10 @@ const Schema = mongoose.Schema(
 			require: true,
 			unique: true,
 		},
-		partnerTransaction: {
+		supplierTransaction: {
 			type: String,
 			require: true,
+			unique: true,
 		},
 		paymentMethod: {
 			type: String,

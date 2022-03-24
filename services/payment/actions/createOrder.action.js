@@ -42,7 +42,7 @@ module.exports = async function (ctx) {
 					userId,
 					orderId: uid(15),
 					transaction: uuid,
-					partnerTransaction: "",
+					supplierTransaction: "",
 				},
 			]);
 
@@ -97,7 +97,7 @@ module.exports = async function (ctx) {
 					userId,
 					orderId: uid(15),
 					transaction: uuid,
-					partnerTransaction: "mn4UupDOhfxbElj", // giả sử bên t3 trả về
+					supplierTransaction: "mn4UupDOhfxbElj", // giả sử bên t3 trả về
 				},
 			]);
 			if (_.get(orderInfo, "id", null) === null) {

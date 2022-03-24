@@ -48,6 +48,51 @@ module.exports = {
 	 * Actions
 	 */
 	actions: {
+		statisticCustomer: {
+			rest: {
+				method: "POST",
+				fullPath: "/v1/External/StatisticCustomer",
+				auth: false,
+			},
+			params: {
+				body: {
+					$$type: "object",
+					fromDate: "string",
+					toDate: "string",
+				},
+			},
+			handler: require("./actions/statisticCustomer.action"),
+		},
+		exportStatisticTransaction: {
+			rest: {
+				method: "",
+				fullPath: "/v1/External/ExportStatisticTransaction",
+				auth: false,
+			},
+			params: {
+				body: {
+					$$type: "object",
+					fromDate: "string",
+					toDate: "string",
+				},
+			},
+			handler: require("./actions/exportStatisticTransaction.action"),
+		},
+		statisticTransaction: {
+			rest: {
+				method: "POST",
+				fullPath: "/v1/External/StatisticTransaction",
+				auth: false,
+			},
+			params: {
+				body: {
+					$$type: "object",
+					fromDate: "string",
+					toDate: "string",
+				},
+			},
+			handler: require("./actions/statisticTransaction.action"),
+		},
 		urlReturn: {
 			rest: {
 				method: "POST",
