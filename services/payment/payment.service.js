@@ -48,32 +48,59 @@ module.exports = {
 	 * Actions
 	 */
 	actions: {
-		statisticCustomer: {
+		exportStatisticCustomer: {
 			rest: {
 				method: "POST",
-				fullPath: "/v1/External/StatisticCustomer",
-				auth: false,
+				fullPath: "/v1/External/ExportStatisticCustomer",
+				auth: {
+					strategies: ["isAdmin"],
+					mode: "required", // 'required', 'optional', 'try'
+				},
 			},
 			params: {
 				body: {
 					$$type: "object",
 					fromDate: "string",
 					toDate: "string",
+					userId: "number|optional",
+				},
+			},
+			handler: require("./actions/exportStatisticCustomer.action"),
+		},
+		statisticCustomer: {
+			rest: {
+				method: "POST",
+				fullPath: "/v1/External/StatisticCustomer",
+				auth: {
+					strategies: ["isAdmin"],
+					mode: "required", // 'required', 'optional', 'try'
+				},
+			},
+			params: {
+				body: {
+					$$type: "object",
+					fromDate: "string",
+					toDate: "string",
+					userId: "number|optional",
 				},
 			},
 			handler: require("./actions/statisticCustomer.action"),
 		},
 		exportStatisticTransaction: {
 			rest: {
-				method: "",
+				method: "POST",
 				fullPath: "/v1/External/ExportStatisticTransaction",
-				auth: false,
+				auth: {
+					strategies: ["isAdmin"],
+					mode: "required", // 'required', 'optional', 'try'
+				},
 			},
 			params: {
 				body: {
 					$$type: "object",
 					fromDate: "string",
 					toDate: "string",
+					paymentMethod: "string|optional",
 				},
 			},
 			handler: require("./actions/exportStatisticTransaction.action"),
@@ -82,13 +109,17 @@ module.exports = {
 			rest: {
 				method: "POST",
 				fullPath: "/v1/External/StatisticTransaction",
-				auth: false,
+				auth: {
+					strategies: ["isAdmin"],
+					mode: "required", // 'required', 'optional', 'try'
+				},
 			},
 			params: {
 				body: {
 					$$type: "object",
 					fromDate: "string",
 					toDate: "string",
+					paymentMethod: "string|optional",
 				},
 			},
 			handler: require("./actions/statisticTransaction.action"),

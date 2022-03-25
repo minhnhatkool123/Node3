@@ -45,7 +45,7 @@ module.exports = async function (ctx) {
 				if (wallet.amount < order.total) {
 					return {
 						code: 1001,
-						message: this.__("Ví không đủ tiền"),
+						message: this.__("Số dư ko đủ"),
 					};
 				}
 
@@ -89,7 +89,7 @@ module.exports = async function (ctx) {
 								transaction,
 							},
 							{
-								status: payWalletConstant.STATUS.CANCELED,
+								status: payWalletConstant.STATUS.FAILED,
 							},
 						]
 					);

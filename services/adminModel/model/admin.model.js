@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const autoIncrement = require("mongoose-auto-increment");
-const walletHistoryConstant = require("../constants/walletHistoryConstant");
+const adminConstant = require("../constants/adminConstant");
 
 autoIncrement.initialize(mongoose);
 
@@ -11,40 +11,39 @@ const Schema = mongoose.Schema(
 			required: true,
 			unique: true,
 		},
-		transaction: {
+		name: {
 			type: String,
 			require: true,
+		},
+		password: {
+			type: String,
+			require: true,
+		},
+		phone: {
+			type: String,
+			required: true,
 			unique: true,
 		},
-		walletId: {
-			type: Number,
-			require: true,
-		},
-		amount: {
-			type: Number,
+		email: {
+			type: String,
 			required: true,
+			unique: true,
 		},
-		before: {
-			type: Number,
-			required: true,
+		gender: {
+			type: String,
+			enum: [adminConstant.GENDER.MALE, adminConstant.GENDER.FEMALE],
 		},
-		after: {
-			type: Number,
-			required: true,
-		},
-		status: {
+		avatar: {
 			type: String,
 			require: true,
-			enum: [
-				walletHistoryConstant.STATUS.CANCELED,
-				walletHistoryConstant.STATUS.PENDING,
-				walletHistoryConstant.STATUS.SUCCESS,
-				walletHistoryConstant.STATUS.FAILED,
-			],
+		},
+		type: {
+			type: String,
+			default: adminConstant.ROLE.ADMIN,
 		},
 	},
 	{
-		collection: "WalletHistory",
+		collection: "Admin",
 		versionKey: false,
 		timestamps: true,
 	}
@@ -56,7 +55,5 @@ Schema.plugin(autoIncrement.plugin, {
 	startAt: 1,
 	incrementBy: 1,
 });
-
-//Schema.plugin(autoIncrement.plugin, Schema.options.collection);
 
 module.exports = mongoose.model(Schema.options.collection, Schema);

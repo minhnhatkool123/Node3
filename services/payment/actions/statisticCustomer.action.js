@@ -14,11 +14,11 @@ module.exports = async function (ctx) {
 			},
 		};
 
-		// if (!_.isNil(_.get(payload, "paymentMethod", null))) {
-		// 	where.paymentMethod = payload.paymentMethod;
-		// }
+		if (!_.isNil(_.get(payload, "userId", null))) {
+			where.userId = payload.userId;
+		}
 
-		let orders = await this.broker.call("v1.order.aggregate", [
+		let data = await this.broker.call("v1.order.aggregate", [
 			[
 				{
 					$match: where,
@@ -39,50 +39,50 @@ module.exports = async function (ctx) {
 						},
 						failed: {
 							$sum: {
-								$cond: [{ $eq: ["$status", "CANCELED"] }, 1, 0],
+								$cond: [{ $eq: ["$status", "FAILED"] }, 1, 0],
 							},
 						},
 					},
 				},
-				// {
-				// 	$group: {
-				// 		_id: "$_id.date",
-				// 		countCustomers: {
-				// 			$sum: 1,
-				// 		},
-				// 		pending: {
-				// 			$sum: "$pending",
-				// 		},
-
-				// 		failed: {
-				// 			$sum: "$failed",
-				// 		},
-				// 	},
-				// },
-				// {
-				// 	$project: {
-				// 		_id: 0,
-				// 		date: {
-				// 			$dateToString: {
-				// 				format: "%d/%m/%Y",
-				// 				date: "$_id",
-				// 			},
-				// 		},
-				// 		countCustomers: 1,
-				// 		pending: 1,
-				// 		failed: 1,
-				// 	},
-				// },
 				{
-					$sort: { _id: -1 },
+					$group: {
+						_id: "$_id.date",
+						countCustomers: {
+							$sum: 1,
+						},
+						pending: {
+							$sum: "$pending",
+						},
+
+						failed: {
+							$sum: "$failed",
+						},
+					},
+				},
+				{
+					$project: {
+						_id: 0,
+						date: {
+							$dateToString: {
+								format: "%d/%m/%Y",
+								date: "$_id",
+							},
+						},
+						countCustomers: 1,
+						pending: 1,
+						failed: 1,
+					},
+				},
+				{
+					$sort: { date: 1 },
 				},
 			],
 		]);
 
 		return {
 			code: 1000,
-			message: "Thành công",
-			orders,
+			message: this.__("Thành công"),
+			data,
 		};
 	} catch (err) {
 		if (err.name === "MoleculerError") throw err;

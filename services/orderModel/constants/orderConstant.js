@@ -7,5 +7,6 @@ module.exports = {
 		CANCELED: "CANCELED",
 		PENDING: "PENDING",
 		SUCCESS: "SUCCESS",
+		FAILED: "FAILED",
 	},
 };

@@ -7,7 +7,7 @@ module.exports = function (data) {
 	if (data.status === "Success") {
 		newData.status = paymentConstant.STATUS.SUCCESS;
 	} else if (data.status === "Failed") {
-		newData.status = paymentConstant.STATUS.CANCELED;
+		newData.status = paymentConstant.STATUS.FAILED;
 	}
 
 	return newData;

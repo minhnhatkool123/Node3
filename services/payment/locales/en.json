@@ -8,5 +8,7 @@
 	"Lấy đơn hàng thành công": "Get order success",
 	"Giá đơn hàng phải lớn hơn hoặc bằng 5000": "Order price must be greater than or equal to 5000",
 	"Thanh toán thất bại": "Payment failed",
-	"Tạo đơn hàng thất bại": "Create order failed"
+	"Tạo đơn hàng thất bại": "Create order failed",
+	"Không có dữ liệu": "No data",
+	"Thành công": "Succeeded"
 }

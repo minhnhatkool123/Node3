@@ -78,7 +78,7 @@ module.exports = async function (ctx) {
 							transaction: uuid,
 						},
 						{
-							status: paymentConstant.STATUS.CANCELED,
+							status: paymentConstant.STATUS.FAILED,
 						},
 					]
 				);

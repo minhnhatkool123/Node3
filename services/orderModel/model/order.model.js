@@ -53,6 +53,7 @@ const Schema = mongoose.Schema(
 				orderConstant.STATUS.CANCELED,
 				orderConstant.STATUS.PENDING,
 				orderConstant.STATUS.SUCCESS,
+				orderConstant.STATUS.FAILED,
 			],
 		},
 	},
