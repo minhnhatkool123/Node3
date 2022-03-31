@@ -20,11 +20,11 @@ module.exports = {
 		isAdmin: {
 			registry: {
 				auth: {
-					name: "isAdmin",
+					name: "Admin",
 					jwtKey: process.env.SECRET_KEY_ADMIN,
 				},
 			},
-			handler: require("./actions/isAdmin.action"),
+			handler: require("./actions/admin.action"),
 		},
 	},
 	/**

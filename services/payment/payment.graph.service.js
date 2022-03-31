@@ -19,18 +19,24 @@ module.exports = {
 			resolvers: {
 				MutationPayment: {
 					createOrder: {
-						__resolveType: {
-							action: "v1.payment.graph.createOrder",
-						},
-					},
-					getOrder: {
-						action: "v1.payment.graph.getOrder",
+						action: "v1.payment.graph.createOrder",
 					},
 					statisticTransaction: {
 						action: "v1.payment.graph.statisticTransaction",
 					},
 					exportStatisticTransaction: {
 						action: "v1.payment.graph.exportStatisticTransaction",
+					},
+					statisticCustomer: {
+						action: "v1.payment.graph.statisticCustomer",
+					},
+					exportStatisticCustomer: {
+						action: "v1.payment.graph.exportStatisticCustomer",
+					},
+				},
+				QueryPayment: {
+					getOrder: {
+						action: "v1.payment.graph.getOrder",
 					},
 				},
 			},
@@ -46,17 +52,20 @@ module.exports = {
 					this.setLocale(language);
 				},
 			],
-			//createOrder: ["checkUserScope"],
+			statisticTransaction: ["checkUserScope"],
+			exportStatisticTransaction: ["checkUserScope"],
+			statisticCustomer: ["checkUserScope"],
+			exportStatisticCustomer: ["checkUserScope"],
 		},
-		// error: {
-		// 	"*": function (ctx, error) {
-		// 		return {
-		// 			data: [],
-		// 			succeeded: false,
-		// 			message: error.message || String(error),
-		// 		};
-		// 	},
-		// },
+		error: {
+			"*": function (ctx, error) {
+				return {
+					data: [],
+					succeeded: false,
+					message: error.message || String(error),
+				};
+			},
+		},
 	},
 
 	/**
@@ -68,6 +77,34 @@ module.exports = {
 	 * Actions
 	 */
 	actions: {
+		exportStatisticCustomer: {
+			params: {
+				input: {
+					$$type: "object",
+					fromDate: "string",
+					toDate: "string",
+					userId: "number|optional",
+				},
+			},
+			scope: {
+				name: "admin.view.stat",
+			},
+			handler: require("./actions/exportStatisticCustomer.graph.action"),
+		},
+		statisticCustomer: {
+			params: {
+				input: {
+					$$type: "object",
+					fromDate: "string",
+					toDate: "string",
+					userId: "number|optional",
+				},
+			},
+			scope: {
+				name: "admin.view.stat",
+			},
+			handler: require("./actions/statisticCustomer.graph.action"),
+		},
 		exportStatisticTransaction: {
 			params: {
 				input: {
@@ -76,6 +113,9 @@ module.exports = {
 					toDate: "string",
 					paymentMethod: "string|optional",
 				},
+			},
+			scope: {
+				name: "admin.view.stat",
 			},
 			handler: require("./actions/exportStatisticTransaction.graph.action"),
 		},
@@ -88,9 +128,13 @@ module.exports = {
 					paymentMethod: "string|optional",
 				},
 			},
+			scope: {
+				name: "admin.view.stat",
+			},
 			handler: require("./actions/statisticTransaction.graph.action"),
 		},
 		createOrder: {
+			graphql: {},
 			params: {
 				input: {
 					$$type: "object",
@@ -99,10 +143,7 @@ module.exports = {
 					total: "number|positive",
 				},
 			},
-			// scope: {
-			// 	name: "bo.pending.list",
-			// 	service: "bo",
-			// },
+
 			handler: require("./actions/createOrder.graph.action"),
 		},
 		getOrder: {
@@ -110,7 +151,7 @@ module.exports = {
 		},
 		graphqlPayment: {
 			graphql: {
-				query: "QueryPayment: String",
+				query: "QueryPayment: QueryPayment",
 				mutation: "MutationPayment: MutationPayment",
 			},
 			handler(ctx) {

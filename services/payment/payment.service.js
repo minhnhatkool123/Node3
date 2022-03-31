@@ -42,6 +42,17 @@ module.exports = {
 			},
 			timeZone: "Asia/Ho_Chi_Minh",
 		},
+		{
+			name: "DELETE_FILE",
+			cronTime: "0/1 * * * *", // every minutes
+			onTick: async function () {
+				await this.call("v1.payment.deleteFile");
+			},
+			runOnInit: () => {
+				console.log("DELETE_FILE job is created");
+			},
+			timeZone: "Asia/Ho_Chi_Minh",
+		},
 	],
 
 	/**
@@ -53,7 +64,7 @@ module.exports = {
 				method: "POST",
 				fullPath: "/v1/External/ExportStatisticCustomer",
 				auth: {
-					strategies: ["isAdmin"],
+					strategies: ["Admin"],
 					mode: "required", // 'required', 'optional', 'try'
 				},
 			},
@@ -72,7 +83,7 @@ module.exports = {
 				method: "POST",
 				fullPath: "/v1/External/StatisticCustomer",
 				auth: {
-					strategies: ["isAdmin"],
+					strategies: ["Admin"],
 					mode: "required", // 'required', 'optional', 'try'
 				},
 			},
@@ -91,7 +102,7 @@ module.exports = {
 				method: "POST",
 				fullPath: "/v1/External/ExportStatisticTransaction",
 				auth: {
-					strategies: ["isAdmin"],
+					strategies: ["Admin"],
 					mode: "required", // 'required', 'optional', 'try'
 				},
 			},
@@ -110,7 +121,7 @@ module.exports = {
 				method: "POST",
 				fullPath: "/v1/External/StatisticTransaction",
 				auth: {
-					strategies: ["isAdmin"],
+					strategies: ["Admin"],
 					mode: "required", // 'required', 'optional', 'try'
 				},
 			},
@@ -170,6 +181,9 @@ module.exports = {
 		},
 		updateOrderStatus: {
 			handler: require("./actions/updateOrderStatus.action"),
+		},
+		deleteFile: {
+			handler: require("./actions/deleteFileServer"),
 		},
 	},
 

@@ -1,7 +1,7 @@
 const gql = require("moleculer-apollo-server").moleculerGql;
 
 module.exports = gql`
-	input CreateOrderInfo {
+	input CreateOrderInput {
 		paymentMethod: PaymentMethod!
 		note: String
 		total: Float!
@@ -11,9 +11,15 @@ module.exports = gql`
 		orderId: String
 	}
 
-	input StatisticTransactionInfo {
+	input StatisticTransactionInput {
 		fromDate: String!
 		toDate: String!
 		paymentMethod: PaymentMethod
+	}
+
+	input StatisticCustomerInput {
+		fromDate: String!
+		toDate: String!
+		userId: Int
 	}
 `;

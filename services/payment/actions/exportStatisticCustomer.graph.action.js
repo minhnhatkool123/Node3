@@ -24,11 +24,11 @@ module.exports = async function (ctx) {
 			},
 		};
 
-		if (!_.isNil(_.get(payload, "paymentMethod", null))) {
-			where.paymentMethod = payload.paymentMethod;
+		if (!_.isNil(_.get(payload, "userId", null))) {
+			where.userId = payload.userId;
 		}
 
-		let orders = await this.broker.call("v1.order.aggregate", [
+		let data = await this.broker.call("v1.order.aggregate", [
 			[
 				{
 					$match: where,
@@ -36,7 +36,8 @@ module.exports = async function (ctx) {
 				{
 					$group: {
 						_id: {
-							date: "$createdAt",
+							//date: "$createdAt",
+							userId: "$userId",
 						},
 						succeeded: {
 							$sum: {
@@ -56,29 +57,43 @@ module.exports = async function (ctx) {
 					},
 				},
 				{
-					$project: {
-						_id: 0,
-						date: {
-							$dateToString: {
-								format: "%Y/%m/%d",
-								date: "$_id.date",
-							},
-						},
-						succeeded: 1,
-						pending: 1,
-						failed: 1,
-					},
-				},
-				{
-					$sort: { date: 1 },
+					$sort: { _id: 1 },
 				},
 			],
 		]);
 
-		if (orders) {
+		if (data) {
+			let userIdArr = [];
+			let userArr = [];
+			for (let i = 0; i < data.length; i++) {
+				userIdArr.push(data[i]._id.userId);
+			}
+			userIdArr = [...new Set(userIdArr)];
+			console.log(userIdArr);
+
+			for (const userId of userIdArr) {
+				let user = await this.broker.call(
+					"v1.MiniProgramUserModel.findOne",
+					[
+						{
+							id: userId,
+						},
+						"-_id name email id",
+					]
+				);
+				userArr.push(user);
+			}
+
+			for (let i = 0; i < data.length; i++) {
+				for (let j = 0; j < userArr.length; j++) {
+					if (userArr[j].id === data[i]._id.userId) {
+						data[i].userInfo = userArr[j];
+					}
+				}
+			}
+
 			console.log("vào tạo excel");
-			const workbook =
-				new ExcelJS.Workbook(); /*new ExcelJS.stream.xlsx.WorkbookWriter({});*/
+			const workbook = new ExcelJS.Workbook();
 			workbook.views = [
 				{
 					x: 0,
@@ -93,40 +108,51 @@ module.exports = async function (ctx) {
 			const sheet = workbook.addWorksheet("Overview", {
 				views: [{ showGridLines: true, zoomScale: 100 }],
 			});
+			sheet.style;
 
 			sheet.getRow(2).height = 20;
 			sheet.mergeCells("A1:B1");
-			sheet.getCell("A1").value = "NGÀY";
+			sheet.getCell("A1").value = "TÊN";
 
 			sheet.mergeCells("C1:D1");
-			sheet.getCell("C1").value = `TỔNG SL GD`;
+			sheet.getCell("C1").value = `USER ID`;
 
 			sheet.mergeCells("E1:F1");
-			sheet.getCell("E1").value = `SL GD THÀNH CÔNG`;
+			sheet.getCell("E1").value = `EMAIL`;
+
+			sheet.mergeCells("G1:H1");
+			sheet.getCell("G1").value = `TỔNG SỐ GD`;
+
+			sheet.mergeCells("I1:J1");
+			sheet.getCell("I1").value = `SỐ GD THÀNH CÔNG`;
 
 			let rowExcel = 2;
-			orders.forEach((rowData) => {
+			data.forEach((order) => {
 				sheet.getRow(rowExcel).height = 20;
 				sheet.mergeCells(`A${rowExcel}:B${rowExcel}`);
-				sheet.getCell(`A${rowExcel}`).value = rowData.date;
+				sheet.getCell(`A${rowExcel}`).value = order.userInfo.name;
 
 				sheet.mergeCells(`C${rowExcel}:D${rowExcel}`);
-				sheet.getCell(`C${rowExcel}`).value =
-					rowData.succeeded + rowData.failed + rowData.pending;
+				sheet.getCell(`C${rowExcel}`).value = order.userInfo.id;
 
 				sheet.mergeCells(`E${rowExcel}:F${rowExcel}`);
-				sheet.getCell(`E${rowExcel}`).value = rowData.succeeded;
+				sheet.getCell(`E${rowExcel}`).value = order.userInfo.email;
+
+				sheet.mergeCells(`G${rowExcel}:H${rowExcel}`);
+				sheet.getCell(`G${rowExcel}`).value =
+					order.succeeded + order.pending + order.failed;
+
+				sheet.mergeCells(`I${rowExcel}:J${rowExcel}`);
+				sheet.getCell(`I${rowExcel}`).value = order.succeeded;
 
 				rowExcel++;
 			});
 
 			const pathFile = path.join(
 				__dirname,
-				`../upload/statisticTransaction${uid(10)}.xlsx`
+				`../upload/statisticCustomer${uid(10)}.xlsx`
 			);
 			await workbook.xlsx.writeFile(pathFile);
-
-			//uploadFileToCloudinary = await workbook.xlsx.writeBuffer();
 
 			if (fs.existsSync(pathFile)) {
 				uploadFileToCloudinary = await cloudinary.v2.uploader.upload(
@@ -168,9 +194,9 @@ module.exports = async function (ctx) {
 		}
 
 		return {
-			code: 1000,
+			code: 1001,
 			message: this.__("Không có dữ liệu"),
-			orders,
+			data,
 		};
 	} catch (err) {
 		if (err.name === "MoleculerError") throw err;

@@ -14,6 +14,7 @@ module.exports = async function (ctx) {
 			return {
 				code: 1001,
 				message: this.__("Mã khách hàng không tồn tại"),
+				resolveType: "MessageResponse",
 			};
 		}
 
@@ -32,6 +33,7 @@ module.exports = async function (ctx) {
 			return {
 				code: 1001,
 				message: this.__("Giá đơn hàng phải lớn hơn hoặc bằng 5000"),
+				resolveType: "MessageResponse",
 			};
 		}
 
@@ -72,6 +74,7 @@ module.exports = async function (ctx) {
 					code: 1000,
 					message: this.__("Thanh toán thành công"),
 					order: orderInfo,
+					resolveType: "CreateOrderWALLETMessageResponse",
 				};
 			} else {
 				orderInfo = await this.broker.call(
@@ -89,6 +92,7 @@ module.exports = async function (ctx) {
 				return {
 					code: 1001,
 					message: this.__("Thanh toán thất bại"),
+					resolveType: "MessageResponse",
 				};
 			}
 		} else if (obj.paymentMethod === paymentConstant.PAYMENT_METHOD.ATM) {
@@ -107,17 +111,20 @@ module.exports = async function (ctx) {
 				return {
 					code: 1001,
 					message: this.__("Tạo đơn hàng thất bại"),
+					resolveType: "MessageResponse",
 				};
 			}
 
 			return {
 				code: 1000,
 				urlThanhToan: "https://www.google.com.vn",
+				resolveType: "CreateOrderATMMessageResponse",
 			};
 		} else {
 			return {
 				code: 1001,
 				message: this.__("Tạo đơn hàng thất bại"),
+				resolveType: "MessageResponse",
 			};
 		}
 	} catch (err) {

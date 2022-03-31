@@ -17,7 +17,7 @@ module.exports = async function (ctx) {
 		}
 
 		const accessToken = await this.broker.call(
-			"v1.accessTokenAdmin.findOne",
+			"v1.MiniProgramUserTokenModel.findOne",
 			[{ id: authInfo.tokenId }]
 		);
 
@@ -40,10 +40,10 @@ module.exports = async function (ctx) {
 		}
 
 		const { userId } = accessToken;
-		const userInfo = await this.broker.call("v1.admin.findOne", [
-			{ id: userId },
-			"-password",
-		]);
+		const userInfo = await this.broker.call(
+			"v1.MiniProgramUserModel.findOne",
+			[{ id: userId }, "-password"]
+		);
 
 		if (_.get(userInfo, "id", false) === false) {
 			throw new MoleculerError(
@@ -52,10 +52,6 @@ module.exports = async function (ctx) {
 				null,
 				null
 			);
-		}
-
-		if (userInfo.type !== "ADMIN") {
-			throw new MoleculerError("Bạn không có quyền", 401, null, null);
 		}
 
 		return userInfo;
