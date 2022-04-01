@@ -19,6 +19,8 @@ module.exports = gql`
 		exportStatisticCustomer(
 			input: StatisticCustomerInput
 		): StatisticCustomerMessageResponse!
+
+		dateTimeTest(input: TestDateInput!): String
 	}
 
 	type QueryPayment {
@@ -91,7 +93,7 @@ module.exports = gql`
 		orderId: String
 		transaction: String
 		supplierTransaction: String
-		createdAt: String
+		createdAt: DateTime
 		id: Int
 		orderCreator: OrderCreator
 	}

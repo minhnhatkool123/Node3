@@ -3,6 +3,9 @@ const Cron = require("moleculer-cron");
 const { I18n } = require("i18n");
 const path = require("path");
 const DIRNAME = __dirname;
+const moment = require("moment");
+
+moment.tz.setDefault("Asia/Ho_Chi_Minh");
 
 module.exports = {
 	name: "payment.graph",
@@ -32,6 +35,9 @@ module.exports = {
 					},
 					exportStatisticCustomer: {
 						action: "v1.payment.graph.exportStatisticCustomer",
+					},
+					dateTimeTest: {
+						action: "v1.payment.graph.dateTimeTest",
 					},
 				},
 				QueryPayment: {
@@ -77,77 +83,38 @@ module.exports = {
 	 * Actions
 	 */
 	actions: {
+		dateTimeTest: {
+			handler: require("./actions/dateTimeTest"),
+		},
 		exportStatisticCustomer: {
-			params: {
-				input: {
-					$$type: "object",
-					fromDate: "string",
-					toDate: "string",
-					userId: "number|optional",
-				},
-			},
 			scope: {
 				name: "admin.view.stat",
 			},
-			handler: require("./actions/exportStatisticCustomer.graph.action"),
+			handler: require("./actions/exportStatisticCustomer.action"),
 		},
 		statisticCustomer: {
-			params: {
-				input: {
-					$$type: "object",
-					fromDate: "string",
-					toDate: "string",
-					userId: "number|optional",
-				},
-			},
 			scope: {
 				name: "admin.view.stat",
 			},
-			handler: require("./actions/statisticCustomer.graph.action"),
+			handler: require("./actions/statisticCustomer.action"),
 		},
 		exportStatisticTransaction: {
-			params: {
-				input: {
-					$$type: "object",
-					fromDate: "string",
-					toDate: "string",
-					paymentMethod: "string|optional",
-				},
-			},
 			scope: {
 				name: "admin.view.stat",
 			},
-			handler: require("./actions/exportStatisticTransaction.graph.action"),
+			handler: require("./actions/exportStatisticTransaction.action"),
 		},
 		statisticTransaction: {
-			params: {
-				input: {
-					$$type: "object",
-					fromDate: "string",
-					toDate: "string",
-					paymentMethod: "string|optional",
-				},
-			},
 			scope: {
 				name: "admin.view.stat",
 			},
-			handler: require("./actions/statisticTransaction.graph.action"),
+			handler: require("./actions/statisticTransaction.action"),
 		},
 		createOrder: {
-			graphql: {},
-			params: {
-				input: {
-					$$type: "object",
-					paymentMethod: "string",
-					note: "string|optional",
-					total: "number|positive",
-				},
-			},
-
-			handler: require("./actions/createOrder.graph.action"),
+			handler: require("./actions/createOrder.action"),
 		},
 		getOrder: {
-			handler: require("./actions/getOrder.graph.action"),
+			handler: require("./actions/getOrder.action"),
 		},
 		graphqlPayment: {
 			graphql: {

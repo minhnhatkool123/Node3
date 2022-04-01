@@ -11,7 +11,9 @@ module.exports = async function (ctx) {
 		}
 
 		const userId = ctx.meta.auth.credentials.userId;
-		const { orderId } = ctx.params.params;
+		const { orderId } = ctx.service.name.includes(".graph")
+			? ctx.params.input
+			: ctx.params.body;
 		console.log("orderId", orderId);
 
 		const order = await this.broker.call("v1.order.findOne", [

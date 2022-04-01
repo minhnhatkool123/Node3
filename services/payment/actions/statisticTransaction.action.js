@@ -6,7 +6,13 @@ const paymentConstant = require("../constants/paymentConstant");
 
 module.exports = async function (ctx) {
 	try {
-		const payload = ctx.params.body;
+		const payload = ctx.service.name.includes(".graph")
+			? ctx.params.input
+			: ctx.params.body;
+
+		console.log("CCC", new Date(`${payload.fromDate}`));
+		console.log("DDD", new Date(`${payload.toDate}`));
+
 		const where = {
 			createdAt: {
 				$gte: new Date(`${payload.fromDate}`), //format: 'yyyy-MM-dd'

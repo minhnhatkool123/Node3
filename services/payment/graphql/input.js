@@ -12,14 +12,18 @@ module.exports = gql`
 	}
 
 	input StatisticTransactionInput {
-		fromDate: String!
-		toDate: String!
+		fromDate: DateTime!
+		toDate: DateTime!
 		paymentMethod: PaymentMethod
 	}
 
 	input StatisticCustomerInput {
-		fromDate: String!
-		toDate: String!
+		fromDate: DateTime!
+		toDate: DateTime!
 		userId: Int
+	}
+
+	input TestDateInput {
+		date: DateTime
 	}
 `;

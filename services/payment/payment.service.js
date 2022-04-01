@@ -154,7 +154,7 @@ module.exports = {
 				method: "POST",
 				fullPath: "/v1/External/CreateOrder",
 				auth: {
-					strategies: ["Default"],
+					strategies: ["Default", "Admin"],
 					mode: "required", // 'required', 'optional', 'try'
 				},
 			},
@@ -173,7 +173,7 @@ module.exports = {
 				method: "GET",
 				fullPath: "/v1/External/GetOrder/:orderId",
 				auth: {
-					strategies: ["Default"],
+					strategies: ["Default", "Admin"],
 					mode: "required", // 'required', 'optional', 'try'
 				},
 			},

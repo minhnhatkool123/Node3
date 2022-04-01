@@ -7,15 +7,26 @@ const paymentConstant = require("../constants/paymentConstant");
 
 module.exports = async function (ctx) {
 	try {
+		// console.log("ctx", ctx.action.scope.name);
+		// console.log("meta", ctx.meta);
+
 		if (_.get(ctx, "meta.auth.credentials.userId", null) === null) {
 			return {
 				code: 1001,
 				message: this.__("Mã khách hàng không tồn tại"),
+				resolveType: "MessageResponse",
 			};
 		}
 
+		let res,
+			checkGraph = false,
+			payload = ctx.params.body;
+
+		if (ctx.service.name.includes(".graph")) {
+			checkGraph = true;
+			payload = ctx.params.input;
+		}
 		const userId = ctx.meta.auth.credentials.userId;
-		const payload = ctx.params.body;
 		const obj = {
 			paymentMethod: payload.paymentMethod,
 			total: payload.total,
@@ -26,10 +37,21 @@ module.exports = async function (ctx) {
 		}
 
 		if (obj.total < 5000) {
-			return {
-				code: 1001,
-				message: this.__("Giá đơn hàng phải lớn hơn hoặc bằng 5000"),
-			};
+			checkGraph
+				? (res = {
+						code: 1001,
+						message: this.__(
+							"Giá đơn hàng phải lớn hơn hoặc bằng 5000"
+						),
+						resolveType: "MessageResponse",
+				  })
+				: (res = {
+						code: 1001,
+						message: this.__(
+							"Giá đơn hàng phải lớn hơn hoặc bằng 5000"
+						),
+				  });
+			return res;
 		}
 
 		let orderInfo = null;
@@ -65,11 +87,17 @@ module.exports = async function (ctx) {
 					]
 				);
 
-				return {
+				res = {
 					code: 1000,
 					message: this.__("Thanh toán thành công"),
 					order: orderInfo,
 				};
+
+				if (checkGraph) {
+					res.resolveType = "CreateOrderWALLETMessageResponse";
+				}
+
+				return res;
 			} else {
 				orderInfo = await this.broker.call(
 					"v1.order.findOneAndUpdate",
@@ -83,10 +111,16 @@ module.exports = async function (ctx) {
 					]
 				);
 
-				return {
+				res = {
 					code: 1001,
 					message: this.__("Thanh toán thất bại"),
+					MessageResponse,
 				};
+
+				if (checkGraph) {
+					res.resolveType = "MessageResponse";
+				}
+				return res;
 			}
 		} else if (obj.paymentMethod === paymentConstant.PAYMENT_METHOD.ATM) {
 			console.log("vào ATM thanh toán");
@@ -101,21 +135,36 @@ module.exports = async function (ctx) {
 				},
 			]);
 			if (_.get(orderInfo, "id", null) === null) {
-				return {
+				res = {
 					code: 1001,
 					message: this.__("Tạo đơn hàng thất bại"),
 				};
+
+				if (checkGraph) {
+					res.resolveType = "MessageResponse";
+				}
+
+				return res;
 			}
 
-			return {
+			res = {
 				code: 1000,
 				urlThanhToan: "https://www.google.com.vn",
 			};
+			if (checkGraph) {
+				res.resolveType = "CreateOrderATMMessageResponse";
+			}
+			return res;
 		} else {
-			return {
+			res = {
 				code: 1001,
 				message: this.__("Tạo đơn hàng thất bại"),
 			};
+
+			if (checkGraph) {
+				res.resolveType = "MessageResponse";
+			}
+			return res;
 		}
 	} catch (err) {
 		if (err.name === "MoleculerError") throw err;
